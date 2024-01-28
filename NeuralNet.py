@@ -14,7 +14,7 @@ class NeuralNet(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
-    def train_model(self, x, y, optimizer, epochs=1000, early_stopping=True, early_stopping_epochs=3,  verbose=False):
+    def train_model(self, x, y, optimizer, epochs=1000, early_stopping=True, early_stopping_epochs=3):
         self.train()  
 
         epoch_loss_increase = 0
@@ -22,9 +22,6 @@ class NeuralNet(nn.Module):
         minimum_loss = 0
 
         for epoch in range(epochs):
-            if verbose:
-                print(f'Epoch {epoch+1}/{epochs}')
-
             x = x.to(self.device)
             y = y.to(self.device)
             y_pred = self.layers(x)
@@ -42,14 +39,9 @@ class NeuralNet(nn.Module):
                     epoch_loss_increase += 1
                     
                     if epoch_loss_increase == early_stopping_epochs:
-                        print('Early stopping...')
                         break
                 elif loss.item() < previous_epoch_loss:
                     minimum_loss = loss.item()
-                    
-                    if verbose:
-                        print(
-                            f'---! NEW BEST EPOCH: !---\nCurrent: {minimum_loss}\nPrevious: {previous_epoch_loss}\n---! NEW BEST EPOCH: !---\n')
                     epoch_loss_increase = 0
                 else:
                     epoch_loss_increase = 0
@@ -65,23 +57,12 @@ class NeuralNet(nn.Module):
 
         with T.no_grad():
             for i in range(len(x)):
-                if verbose:
-                    print(f'Running test example [{i+1}/{len(x)}]')
-
                 x = x.to(self.device)
                 y = y.to(self.device)
                 y_pred = self.layers(x)
                 predictions = np.append(predictions, y_pred)
                 loss = self.loss_fn(y_pred, y)
                 total_loss += loss.item()
-
-                if verbose:
-                    print(
-                        f'[TEST_{i}] current loss: {loss.item()}, total_loss = {total_loss}')
-
-        if verbose:
-            print(f'Average loss: {total_loss/len(x)}')
-
         return predictions
 
     def predict(self, x):
