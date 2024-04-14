@@ -30,9 +30,6 @@ class NeuralNet(nn.Module):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
-            if verbose:
-                print(f'Loss: {loss.item()}')
             
             if early_stopping:
                 if loss.item() > previous_epoch_loss:
